@@ -1,5 +1,9 @@
 from decimal import Decimal as DecimalDecoder
-from bson import ObjectId as ObjectIdEncoder
+try:
+    from bson import ObjectId as ObjectIdEncoder
+except ImportError:
+    def ObjectIdEncoder(*args):
+        raise ImportWarning('`bson` module not found')
 
 from .bases import BaseNode
 

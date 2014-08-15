@@ -46,4 +46,3 @@ class SchemaMeta(type):
         cls_attrs[SCHEMA_ATTRIBUTE_NODES] = dict(bases_nodes, **nodes)
 
         return super(SchemaMeta, mcs).__new__(mcs, cls_name, cls_bases, cls_attrs)
-
