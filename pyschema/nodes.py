@@ -5,7 +5,7 @@ except ImportError:
     def ObjectIdEncoder(*args):
         raise ImportWarning('`bson` module not found')
 
-from .bases import BaseNode
+from pyschema.bases import BaseNode
 
 
 __all__ = [

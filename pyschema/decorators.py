@@ -1,4 +1,5 @@
 from functools import partial
+
 from pyschema.bases import SchemaAbstractProperty
 from pyschema.nodes import Builder
 from pyschema.schema import Schema

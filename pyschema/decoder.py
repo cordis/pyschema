@@ -1,4 +1,4 @@
-from .nodes import *
+from pyschema.nodes import *
 
 
 class SchemaDecoder(object):
@@ -11,6 +11,7 @@ class SchemaDecoder(object):
             Str: instance._visit_value,
             Unicode: instance._visit_value,
             Int: instance._visit_value,
+            Bool: instance._visit_value,
             Float: instance._visit_value,
             Decimal: instance._visit_value,
             ObjectId: instance._visit_value,
