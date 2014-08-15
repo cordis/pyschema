@@ -35,12 +35,14 @@ class SchemaMeta(type):
 
         if SCHEMA_ATTRIBUTE_FACTORY not in cls_attrs:
             factory_name = cls_name + SCHEMA_ATTRIBUTE_FACTORY
-            factory_bases = tuple(filter(bool, bases_factory_list))
             factory_attrs = dict(dict.fromkeys(nodes.keys()), **default_nodes)
+            factory_bases = list(filter(bool, bases_factory_list))
+            if SCHEMA_ATTRIBUTE_INTERFACE in cls_attrs:
+                factory_bases.insert(0, cls_attrs[SCHEMA_ATTRIBUTE_INTERFACE])
             if not factory_bases:
                 factory_bases = (object, )
                 factory_attrs['__schema__registry_args__'] = None
-            cls_attrs[SCHEMA_ATTRIBUTE_FACTORY] = type(factory_name, factory_bases, factory_attrs)
+            cls_attrs[SCHEMA_ATTRIBUTE_FACTORY] = type(factory_name, tuple(factory_bases), factory_attrs)
 
         cls_attrs[SCHEMA_ATTRIBUTE_NODES] = dict(bases_node_dict, **nodes)
 

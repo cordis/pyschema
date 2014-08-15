@@ -11,6 +11,9 @@ class Schema(object):
     __decoder__ = SchemaDecoder.create_instance()
     __encoder__ = SchemaEncoder.create_instance()
 
+    class Interface(object):
+        pass
+
     @classmethod
     def decode_registry(cls, data, args_getter, registry):
         return cls.__decoder__(Registry(args_getter, registry), data)
