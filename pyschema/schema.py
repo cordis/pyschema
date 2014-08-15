@@ -1,18 +1,14 @@
-from .const import *
-from .bases import SchemaMeta
-from .nodes import Builder, Registry
-from .builder import SchemaBeanBuilder
-from .decoder import SchemaDecoder
-from .encoder import SchemaEncoder
+from pyschema.const import *
+from pyschema.bases import SchemaMeta
+from pyschema.nodes import Builder, Registry
+from pyschema.decoder import SchemaDecoder
+from pyschema.encoder import SchemaEncoder
 
 
 class Schema(object):
     __metaclass__ = SchemaMeta
-    __decoder__ = SchemaDecoder.create_instance()
     __encoder__ = SchemaEncoder.create_instance()
-
-    Interface = _Interface
-    Bean = _Bean
+    __decoder__ = SchemaDecoder.create_instance()
 
     @classmethod
     def decode_registry(cls, data, args_getter, registry):
@@ -22,20 +18,18 @@ class Schema(object):
     def encode_registry(cls, obj, registry):
         return cls.__encoder__(Registry(None, registry), obj)
 
-    def __init__(self, factory=None):
+    @classmethod
+    def decode(cls, data):
+        return cls.__decoder__(Builder(cls), data)
+
+    @classmethod
+    def get_nodes(cls):
+        return getattr(cls, SCHEMA_ATTRIBUTE_NODES).items()
+
+    def __init__(self):
         if type(self) is Schema:
             raise TypeError('Unable to instantiate base Schema class')
-        if factory is not None:
-            setattr(self, SCHEMA_ATTRIBUTE_FACTORY, factory)
-        else:
-            factory = getattr(self, SCHEMA_ATTRIBUTE_FACTORY)
-        self.__builder__ = SchemaBeanBuilder(factory)
+        print type(self)
 
-    def decode(self, data):
-        return self.__decoder__(Builder(self), data)
-
-    def encode(self, obj, ignore=None):
-        return self.__encoder__(Builder(self), obj, ignore)
-
-    def get_nodes(self):
-        return getattr(self, SCHEMA_ATTRIBUTE_NODES).items()
+    def encode(self, ignore=None):
+        return self.__encoder__(Builder(type(self)), self, ignore)

@@ -66,9 +66,9 @@ class ObjectId(Node):
 class Builder(Node):
     default_decode = dict
 
-    def __init__(self, schema, key=None):
+    def __init__(self, schema_cls, key=None):
         super(Builder, self).__init__(key=key)
-        self.schema = schema
+        self.schema_cls = schema_cls
 
 
 class Registry(Node):

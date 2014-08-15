@@ -1,4 +1,4 @@
-from bson import ObjectId as object_id_factory
+#from bson import ObjectId as object_id_factory
 from decimal import Decimal as decimal_factory
 from pyschema import *
 
@@ -10,7 +10,7 @@ def test_plain_schema():
     int_node_value = 10
     float_node_value = 4.45
     decimal_node_value = decimal_factory('32.233')
-    object_id_node_value = object_id_factory()
+    #object_id_node_value = object_id_factory()
 
     class TestSchema(Schema):
         default_node = Default(default_node_value)
@@ -18,8 +18,8 @@ def test_plain_schema():
         str_node = Str()
         int_node = Int()
         float_node = Float()
-        decimal_node = Decimal()
-        object_id_node = ObjectId('_object_id_node_key')
+        decimal_node = Decimal('_decimal_node_key')
+        #object_id_node = ObjectId('_object_id_node_key')
 
     data = {
         'default_node': 'something unexpected',
@@ -27,48 +27,65 @@ def test_plain_schema():
         'str_node': str_node_value,
         'int_node': int_node_value,
         'float_node': float_node_value,
-        'decimal_node': str(decimal_node_value),
-        '_object_id_node_key': object_id_node_value,
+        '_decimal_node_key': str(decimal_node_value),
+        #'_object_id_node_key': object_id_node_value,
     }
-    schema = TestSchema()
-    object = schema.decode(dict(data))
-    assert isinstance(object, TestSchema.Bean)
-    assert object.default_node == default_node_value
-    assert object.unicode_node == unicode_node_value
-    assert object.str_node == str_node_value
-    assert object.int_node == int_node_value
-    assert object.float_node == float_node_value
-    assert object.decimal_node == decimal_node_value
-    assert object.object_id_node == str(object_id_node_value)
+    bean = TestSchema.decode(dict(data))
+    assert isinstance(bean, TestSchema)
+    assert bean.default_node == default_node_value
+    assert bean.unicode_node == unicode_node_value
+    assert bean.str_node == str_node_value
+    assert bean.int_node == int_node_value
+    assert bean.float_node == float_node_value
+    assert bean.decimal_node == decimal_node_value
+    #assert object.object_id_node == str(object_id_node_value)
 
     data.pop('default_node')
-    assert data == schema.encode(object)
+    assert data == bean.encode()
 
 
 def test_deep_schema():
     class TestSubSchema(Schema):
-        int_node = Int()
-
+        @schema_property(Int)
+        def int_node(self):
+            pass
 
     class TestSchema(Schema):
-        list_node = List(Builder(TestSubSchema()))
-        dict_node = Dict(Int())
+        @schema_property(List, Builder(TestSubSchema))
+        def list_node(self):
+            pass
+
+        @schema_property(Dict, Int())
+        def dict_node(self):
+            pass
 
     data = {
-        'list_node': [ { 'int_node': 1 }, { 'int_node': 2 }, { 'int_node': 3 }, ],
-        'dict_node': { 'apple': 1, 'orange':2 },
+        'list_node': [
+            {
+                'int_node': 1
+            },
+            {
+                'int_node': 2
+            },
+            {
+                'int_node': 3
+            },
+        ],
+        'dict_node': {
+            'apple': 1,
+            'orange':2
+        },
     }
-    schema = TestSchema()
-    object = schema.decode(data)
+    bean = TestSchema.decode(data)
 
-    assert isinstance(object, TestSchema.Bean)
+    assert isinstance(bean, TestSchema)
     for i in range(3):
-        assert isinstance(object.list_node[i], TestSubSchema.Bean)
-        assert object.list_node[i].int_node == i + 1
-    assert object.dict_node['apple'] == 1
-    assert object.dict_node['orange'] == 2
+        assert isinstance(bean.list_node[i], TestSubSchema)
+        assert bean.list_node[i].int_node == i + 1
+    assert bean.dict_node['apple'] == 1
+    assert bean.dict_node['orange'] == 2
 
-    assert data == schema.encode(object)
+    assert data == bean.encode()
 
 
 def test_registry_schema():
@@ -76,13 +93,22 @@ def test_registry_schema():
     two_id = 'dsafdsf'
 
     class TestSubOneSchema(Schema):
-        id = Int()
-        type = Str()
+        @schema_property(Int)
+        def id(self):
+            pass
+
+        @schema_property(Str)
+        def type(self):
+            pass
 
     class TestSubTwoSchema(Schema):
-        id = Str()
-        type = Str()
+        @schema_property(Str)
+        def id(self):
+            pass
 
+        @schema_property(Str)
+        def type(self):
+            pass
 
     class MyInt(int):
         __schema_registry_args = None
@@ -90,32 +116,35 @@ def test_registry_schema():
     class MyStr(str):
         __schema_registry_args = None
 
-
     class TestSchema(Schema):
-        sub_one = Registry(lambda value: value['type'], {
-            'one': Builder(TestSubOneSchema()),
-            'two': Builder(TestSubTwoSchema()),
+        @schema_property(Registry, lambda value: value['type'], {
+            'one': Builder(TestSubOneSchema),
+            'two': Builder(TestSubTwoSchema),
         })
-        sub_two = Registry(type, {
+        def sub_one(self):
+            pass
+
+        @schema_property(Registry, type, {
             int: Int(decode=MyInt),
             str: Str(decode=MyStr),
         })
+        def sub_two(self):
+            pass
 
     data = {
         'sub_one': {
             'type': 'two',
             'id': two_id,
-            },
+        },
         'sub_two': 4,
     }
-    schema = TestSchema()
-    object = schema.decode(data)
-    assert isinstance(object, TestSchema.Bean)
-    assert isinstance(object.sub_one, TestSubTwoSchema.Bean)
-    assert object.sub_one.id == two_id
-    assert object.sub_two == 4
+    bean = TestSchema.decode(data)
+    assert isinstance(bean, TestSchema)
+    assert isinstance(bean.sub_one, TestSubTwoSchema)
+    assert bean.sub_one.id == two_id
+    assert bean.sub_two == 4
 
-    assert data == schema.encode(object)
+    assert data == bean.encode()
 
     data = {
         'sub_one': {
@@ -124,65 +153,31 @@ def test_registry_schema():
             },
         'sub_two': None,
     }
-    schema = TestSchema()
-    object = schema.decode(data)
-    assert isinstance(object, TestSchema.Bean)
-    assert isinstance(object.sub_one, TestSubOneSchema.Bean)
-    assert object.sub_one.id == one_id
-    assert object.sub_two is None
+    bean = TestSchema.decode(data)
+    assert isinstance(bean, TestSchema)
+    assert isinstance(bean.sub_one, TestSubOneSchema)
+    assert bean.sub_one.id == one_id
+    assert bean.sub_two is None
 
-    assert data == schema.encode(object)
-
-
-def test_custom_factory():
-    class TestSchema(Schema):
-        name = Str()
-
-    class TestCustom(object):
-        def __init__(self, custom_id, status=None):
-            self.id = custom_id
-            self.status = status
-            self.name = None
-
-        def get_id(self):
-            return self.id
-
-        def get_name(self):
-            return self.name
-
-        def is_deleted(self):
-            return self.status == 0
-
-    class TestCustomFactory(object):
-        def __init__(self, custom_id, status=None):
-            self.custom_id = custom_id
-            self.status = status
-
-        def __call__(self):
-            return TestCustom(self.custom_id, status=self.status)
-
-
-    data = { 'name': 'CordiS' }
-    regular_object = TestSchema().decode(data)
-    custom_object = TestSchema(TestCustomFactory(5, status=0)).decode(data)
-
-    assert isinstance(regular_object, TestSchema.Bean)
-    assert not isinstance(regular_object, TestCustom)
-    assert isinstance(custom_object, TestCustom)
-    assert not isinstance(custom_object, TestSchema.Bean)
-    assert custom_object.get_id() == 5
-    assert custom_object.get_name() == 'CordiS'
-    assert custom_object.is_deleted() is True
-
-    assert data == TestSchema().encode(regular_object)
-    assert data == TestSchema().encode(custom_object)
+    assert data == bean.encode()
 
 
 def test_encoding_ignore():
     class TestSchema(Schema):
-        id = ObjectId('_id')
+        @schema_property(Int, '_id')
+        def test_id(self):
+            pass
 
-    data = { '_id': object_id_factory() }
-    object = TestSchema().decode(data)
-    assert isinstance(TestSchema().encode(object)['_id'], object_id_factory)
-    assert isinstance(TestSchema().encode(object, ignore=[ObjectId])['_id'], str)
+    data = {
+        '_id': '123'
+    }
+    bean = TestSchema.decode(data)
+    assert isinstance(bean.encode()['_id'], int)
+    assert isinstance(bean.encode(ignore=[Int])['_id'], str)
+
+
+if __name__ == '__main__':
+    test_plain_schema()
+    test_deep_schema()
+    test_registry_schema()
+    #test_encoding_ignore()

@@ -39,14 +39,14 @@ class SchemaDecoder(object):
         return value
 
     def _visit_builder(self, node, value):
-        return self._visit_schema(node.schema, value)
+        return self._visit_schema(node.schema_cls, value)
 
-    def _visit_schema(self, schema, data):
-        schema.__builder__.reset()
-        for attr, node in schema.get_nodes():
+    def _visit_schema(self, schema_cls, data):
+        bean = schema_cls()
+        for attr, node in schema_cls.get_nodes():
             value = self._visit_node(node, data[node.key])
-            schema.__builder__.set_attr(attr, value)
-        return schema.__builder__.get()
+            setattr(bean, attr, value)
+        return bean
 
     def _visit_registry(self, node, value):
         args = node.args_getter(value)
