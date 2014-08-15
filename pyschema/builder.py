@@ -1,4 +1,4 @@
-class SchemaObjectBuilder(object):
+class SchemaBeanBuilder(object):
     def __init__(self, factory):
         self.factory = factory
         self.instance = None

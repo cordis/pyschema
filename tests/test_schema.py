@@ -1,6 +1,6 @@
 from bson import ObjectId as object_id_factory
 from decimal import Decimal as decimal_factory
-from . import *
+from pyschema import *
 
 
 def test_plain_schema():
@@ -32,7 +32,7 @@ def test_plain_schema():
     }
     schema = TestSchema()
     object = schema.decode(dict(data))
-    assert isinstance(object, TestSchema.Object)
+    assert isinstance(object, TestSchema.Bean)
     assert object.default_node == default_node_value
     assert object.unicode_node == unicode_node_value
     assert object.str_node == str_node_value
@@ -61,9 +61,9 @@ def test_deep_schema():
     schema = TestSchema()
     object = schema.decode(data)
 
-    assert isinstance(object, TestSchema.Object)
+    assert isinstance(object, TestSchema.Bean)
     for i in range(3):
-        assert isinstance(object.list_node[i], TestSubSchema.Object)
+        assert isinstance(object.list_node[i], TestSubSchema.Bean)
         assert object.list_node[i].int_node == i + 1
     assert object.dict_node['apple'] == 1
     assert object.dict_node['orange'] == 2
@@ -110,8 +110,8 @@ def test_registry_schema():
     }
     schema = TestSchema()
     object = schema.decode(data)
-    assert isinstance(object, TestSchema.Object)
-    assert isinstance(object.sub_one, TestSubTwoSchema.Object)
+    assert isinstance(object, TestSchema.Bean)
+    assert isinstance(object.sub_one, TestSubTwoSchema.Bean)
     assert object.sub_one.id == two_id
     assert object.sub_two == 4
 
@@ -126,8 +126,8 @@ def test_registry_schema():
     }
     schema = TestSchema()
     object = schema.decode(data)
-    assert isinstance(object, TestSchema.Object)
-    assert isinstance(object.sub_one, TestSubOneSchema.Object)
+    assert isinstance(object, TestSchema.Bean)
+    assert isinstance(object.sub_one, TestSubOneSchema.Bean)
     assert object.sub_one.id == one_id
     assert object.sub_two is None
 
@@ -166,10 +166,10 @@ def test_custom_factory():
     regular_object = TestSchema().decode(data)
     custom_object = TestSchema(TestCustomFactory(5, status=0)).decode(data)
 
-    assert isinstance(regular_object, TestSchema.Object)
+    assert isinstance(regular_object, TestSchema.Bean)
     assert not isinstance(regular_object, TestCustom)
     assert isinstance(custom_object, TestCustom)
-    assert not isinstance(custom_object, TestSchema.Object)
+    assert not isinstance(custom_object, TestSchema.Bean)
     assert custom_object.get_id() == 5
     assert custom_object.get_name() == 'CordiS'
     assert custom_object.is_deleted() is True

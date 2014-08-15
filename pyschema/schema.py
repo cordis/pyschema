@@ -1,7 +1,7 @@
 from .const import *
 from .bases import SchemaMeta
 from .nodes import Builder, Registry
-from .builder import SchemaObjectBuilder
+from .builder import SchemaBeanBuilder
 from .decoder import SchemaDecoder
 from .encoder import SchemaEncoder
 
@@ -26,7 +26,7 @@ class Schema(object):
             setattr(self, SCHEMA_ATTRIBUTE_FACTORY, factory)
         else:
             factory = getattr(self, SCHEMA_ATTRIBUTE_FACTORY)
-        self.__builder__ = SchemaObjectBuilder(factory)
+        self.__builder__ = SchemaBeanBuilder(factory)
 
     def decode(self, data):
         return self.__decoder__(Builder(self), data)
