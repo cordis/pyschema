@@ -29,7 +29,6 @@ class Schema(object):
     def __init__(self):
         if type(self) is Schema:
             raise TypeError('Unable to instantiate base Schema class')
-        print type(self)
 
     def encode(self, ignore=None):
         return self.__encoder__(Builder(type(self)), self, ignore)
