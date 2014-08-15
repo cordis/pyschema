@@ -1,7 +1,10 @@
-from abc import ABCMeta
+from abc import ABCMeta, abstractproperty
 
 from pyschema.const import *
-from pyschema.decorators import SchemaAbstractProperty
+
+
+class SchemaAbstractProperty(abstractproperty):
+    __schema_node__ = None
 
 
 class BaseNode(object):
