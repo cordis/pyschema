@@ -33,7 +33,12 @@ class SchemaMeta(type):
                 node.key = name
             nodes[name] = node
 
-        if SCHEMA_ATTRIBUTE_FACTORY not in cls_attrs:
+        factory_needed = (
+            SCHEMA_ATTRIBUTE_FACTORY not in cls_attrs or
+            type(cls_attrs[SCHEMA_ATTRIBUTE_FACTORY]) == _Bean
+        )
+
+        if factory_needed:
             factory_name = cls_name + SCHEMA_ATTRIBUTE_FACTORY
             factory_attrs = dict(dict.fromkeys(nodes.keys()), **default_nodes)
             factory_bases = list(filter(bool, bases_factory_list))
