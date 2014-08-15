@@ -13,6 +13,7 @@ __all__ = [
     'Str',
     'Unicode',
     'Int',
+    'Bool',
     'Float',
     'Decimal',
     'ObjectId',
@@ -47,6 +48,10 @@ class Unicode(Node):
 
 class Int(Node):
     default_decode = int
+
+
+class Bool(Node):
+    default_decode = bool
 
 
 class Float(Node):
