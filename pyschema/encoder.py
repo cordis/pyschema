@@ -43,11 +43,11 @@ class SchemaEncoder(object):
         return obj
 
     def _visit_builder(self, node, obj, ignore):
-        return self._visit_schema(node.schema, obj, ignore)
+        return self._visit_schema(node.schema_cls, obj, ignore)
 
-    def _visit_schema(self, schema, obj, ignore):
+    def _visit_schema(self, schema_cls, obj, ignore):
         value = {}
-        for attr, node in schema.get_nodes():
+        for attr, node in schema_cls.get_nodes():
             value[node.key] = self._visit_node(node, getattr(obj, attr), ignore)
         return value
 

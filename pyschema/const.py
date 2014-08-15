@@ -10,3 +10,11 @@ class _Interface(object):
 
 class _Bean(object):
     pass
+
+
+__all__ = [
+    'SCHEMA_ATTRIBUTE_FACTORY',
+    'SCHEMA_ATTRIBUTE_INTERFACE',
+    'SCHEMA_ATTRIBUTE_NODES',
+    'EMPTY_DICT',
+]
